@@ -104,7 +104,7 @@ MAKE_HOOK_OFFSETLESS(Name, void, Il2CppObject * self) {
             percentageDifferenceColor = colorNegative;
             positiveIndicator = "";
         }
-        rankTextLine2 = "\n<color=" + percentageDifferenceColor + "><size=40%>" + positiveIndicator + std::to_string(round(percentageDifference*100)/100).substr(0, 5) + "<size=30%>%";
+        rankTextLine2 = "\n<color=" + percentageDifferenceColor + "><size=40%>" + positiveIndicator + std::to_string(round(percentageDifference*100)/100).substr(0, 5) + "<size=30%>%<size=40%> (" + std::to_string(round(currentPercentage*100)/100).substr(0, 5) + "<size=30%>%<size=40%>)";
         rankTextLine1 = "<line-height=30%><size=60%>" + std::to_string(round(resultPercentage*100)/100).substr(0, 5) + "<size=45%>%";
         int averageCutScore = * GetFieldValue < int > (Results, "averageCutScore");
         RunMethod(rankText, "SetText", createcsstr(rankTextLine1 + rankTextLine2));
