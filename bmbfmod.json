@@ -1,0 +1,28 @@
+{
+    "id": "ScorePercent",
+    "name": "Score Percent",
+    "author": "IdleBob Ported By Futuremappermydud",
+    "description": [
+        
+    ],
+    "category": "Gameplay",
+    "gameVersion": "1.9.1",
+    "version": "0.1.0",
+    "platform": "Quest",
+    "components": [
+        {
+            "type": "HookMod",
+            "installAction": {
+                "installLibraryFile": "libscorepercent.so"
+            },
+            "uninstallAction": {
+                "removeLibraryFile": "libscorepercent.so"
+            }
+        },
+        {
+            "type": "FileCopyMod",
+            "sourceFileName": "libbeatsaber-hook_2019_2_1f1_0_1_2.so",
+            "targetRootedPathAndFileName": "/sdcard/Android/data/com.beatgames.beatsaber/files/libs/libbeatsaber-hook_2019_2_1f1_0_1_2.so"
+        }
+    ]
+}
