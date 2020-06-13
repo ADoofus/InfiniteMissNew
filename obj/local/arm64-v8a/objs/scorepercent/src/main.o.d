@@ -1,5 +1,5 @@
-D:\!ScorePercentage\V2]/obj/local/arm64-v8a/objs/scorepercent/src/main.o: \
-  D:\!ScorePercentage\V2]\src\main.cpp \
+D:\ScorePercentage-Quest/obj/local/arm64-v8a/objs/scorepercent/src/main.o: \
+  D:\ScorePercentage-Quest\src\main.cpp \
   src\..\extern\beatsaber-hook\shared\utils\il2cpp-functions.hpp \
   C:\android-ndk-r20b\build\\..\sources\cxx-stl\llvm-libc++\include\cstddef \
   C:\android-ndk-r20b\build\\..\sources\cxx-stl\llvm-libc++\include\__config \

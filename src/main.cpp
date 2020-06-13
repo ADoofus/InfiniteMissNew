@@ -135,7 +135,6 @@ MAKE_HOOK_OFFSETLESS(Name, void, Il2CppObject * self) {
     }
 }   
 MAKE_HOOK_OFFSETLESS(StandardLevelDetailView_RefreshContent, void, Il2CppObject* self) {
-    StandardLevelDetailView_RefreshContent(self);
     Il2CppObject *Level = *GetFieldValue(self, "_level");
     Il2CppString *LevelID = *GetPropertyValue <Il2CppString*> (Level, "levelID");
 
@@ -150,6 +149,7 @@ MAKE_HOOK_OFFSETLESS(StandardLevelDetailView_RefreshContent, void, Il2CppObject*
     currentScore = *GetPropertyValue <int>(playerLevelStatsData, "highScore");
     int Notes = *GetPropertyValue <int>(beatMapData, "notesCount");
     currentPercentage = calculatePercentage(calculateMaxScore(Notes), currentScore);
+    StandardLevelDetailView_RefreshContent(self);
 }
 
 extern "C" void setup(ModInfo& info) {
