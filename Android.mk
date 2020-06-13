@@ -17,7 +17,7 @@ include $(PREBUILT_SHARED_LIBRARY)
 # Build the beatsaber-hook shared library, SPECIFICALLY VERSIONED!
 include $(CLEAR_VARS)
 LOCAL_MODULE	        := beatsaber-hook
-LOCAL_SRC_FILES         := ./extern/beatsaber-hook/libs/arm64-v8a/libbeatsaber-hook_2019_2_1f1_0_1_2.so
+LOCAL_SRC_FILES         := ./libbeatsaber-hook_2019_2_1f1_0_1_2.so
 LOCAL_EXPORT_C_INCLUDES := ./extern/beatsaber-hook/shared/
 include $(PREBUILT_SHARED_LIBRARY)
 
@@ -30,5 +30,5 @@ LOCAL_CFLAGS     := -I'c:/Program Files/Unity/Hub/Editor/2019.3.1f1/Editor/Data/
 LOCAL_MODULE     := scorepercent
 LOCAL_CPPFLAGS   := -std=c++2a
 LOCAL_C_INCLUDES := ./include ./src
-LOCAL_SRC_FILES  += $(call rwildcard,src/,*.cpp)
+LOCAL_SRC_FILES  += $(call rwildcard,src/,*.cpp) ./extern/beatsaber-hook/src/inline-hook/And64InlineHook.cpp
 include $(BUILD_SHARED_LIBRARY)
