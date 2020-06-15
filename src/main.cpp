@@ -52,8 +52,8 @@ float calculatePercentage(int maxScore, int resultScore) {
     return (float) value / 100;
 }
 
-MAKE_HOOK_OFFSETLESS(Name, void, Il2CppObject * self) {
-    Name(self);
+MAKE_HOOK_OFFSETLESS(Name_ScorePercentage, void, Il2CppObject * self) {
+    Name_ScorePercentage(self);
 
     //Fields
     Il2CppObject * Results = * GetFieldValue(self, "_levelCompletionResults");
@@ -134,8 +134,10 @@ MAKE_HOOK_OFFSETLESS(Name, void, Il2CppObject * self) {
         }
     }
 }   
-MAKE_HOOK_OFFSETLESS(StandardLevelDetailView_RefreshContent, void, Il2CppObject* self) {
-    StandardLevelDetailView_RefreshContent(self);
+MAKE_HOOK_OFFSETLESS(StandardLevelDetailViewController_RefreshContent_ScorePercentage, void, Il2CppObject* self) {
+    logger->info("ENTERED");
+    StandardLevelDetailViewController_RefreshContent_ScorePercentage(self);
+    logger->info("Called Original");
     Il2CppObject *Level = *GetFieldValue(self, "_level");
     Il2CppString *LevelID = *GetPropertyValue <Il2CppString*> (Level, "levelID");
 
@@ -150,6 +152,9 @@ MAKE_HOOK_OFFSETLESS(StandardLevelDetailView_RefreshContent, void, Il2CppObject*
     currentScore = *GetPropertyValue <int>(playerLevelStatsData, "highScore");
     int Notes = *GetPropertyValue <int>(beatMapData, "notesCount");
     currentPercentage = calculatePercentage(calculateMaxScore(Notes), currentScore);
+    auto ScoreText = *GetFieldValue(self, "_highScoreText");
+    RunMethod(ScoreText, "SetText", createcsstr( std::to_string(currentScore) + " (" + std::to_string(currentPercentage) + "%)" ));
+    logger->info("ran code");
 }
 
 extern "C" void setup(ModInfo& info) {
@@ -163,6 +168,6 @@ extern "C" void setup(ModInfo& info) {
 
 extern "C"
 void load() {
-    INSTALL_HOOK_OFFSETLESS(Name, FindMethodUnsafe("", "ResultsViewController", "SetDataToUI", 0));
-    INSTALL_HOOK_OFFSETLESS(StandardLevelDetailView_RefreshContent, FindMethodUnsafe("", "StandardLevelDetailView", "RefreshContent", 0));
+    INSTALL_HOOK_OFFSETLESS(Name_ScorePercentage, FindMethodUnsafe("", "ResultsViewController", "SetDataToUI", 0));
+    INSTALL_HOOK_OFFSETLESS(StandardLevelDetailViewController_RefreshContent_ScorePercentage, FindMethodUnsafe("", "StandardLevelDetailView", "RefreshContent", 0));
 }
