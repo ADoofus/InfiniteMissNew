@@ -1,6 +1,9 @@
 #ifndef UTILS_H_INCLUDED
 #define UTILS_H_INCLUDED
 
+// Location of libil2cpp.so
+#define IL2CPP_SO_PATH "/data/app/com.beatgames.beatsaber-1/lib/arm64/libil2cpp.so"
+
 #if __has_include(<string_view>)
 #include <string_view>
 #elif __has_include(<experimental/string_view>)
@@ -62,7 +65,7 @@ auto&& unwrap_optionals(T&& arg) {
 #define RET_UNLESS(retval, expr) ({ \
     auto&& __temp__ = (expr); \
     if (!__temp__) { \
-        Logger::get().error("%s (in %s at %s:%i) returned false!", #expr, __PRETTY_FUNCTION__, __FILE__, __LINE__); \
+        log(ERROR, "%s (in %s at %s:%i) returned false!", #expr, __PRETTY_FUNCTION__, __FILE__, __LINE__); \
         return retval; \
     } \
     unwrap_optionals(__temp__); })
@@ -159,16 +162,12 @@ std::string string_format(const std::string_view format, TArgs ... args)
 extern "C" {
 #endif /* __cplusplus */
 
-// Creates all directories for a provided file_path
-// Ex: /sdcard/Android/data/something/files/libs/
-int mkpath(char* file_path, mode_t mode);
-
 // Restores an existing stringstream to a newly created state.
 void resetSS(std::stringstream& ss);
 // Prints the given number of "tabs" as spaces to the given output stream.
 void tabs(std::ostream& os, int tabs, int spacesPerTab = 2);
 // Logs the given stringstream and clears it.
-void print(std::stringstream& ss, Logging::Level lvl = Logging::INFO);
+void print(std::stringstream& ss, LOG_VERBOSE_TYPE lvl = (LOG_VERBOSE_TYPE)INFO);
 
 // Attempts to print what is stored at the given pointer.
 // For a given pointer, it will scan 4 void*'s worth of bytes at the location pointed to.
@@ -207,22 +206,29 @@ retval hook_ ## name(__VA_ARGS__)
 #ifdef __aarch64__
 
 #define INSTALL_HOOK(name) MACRO_WRAP( \
-Logger::get().info("Installing 64 bit hook: %s", #name); \
+log(INFO, "Installing 64 bit hook: %s", #name); \
 A64HookFunction((void*)getRealOffset(addr_ ## name),(void*) hook_ ## name, (void**)&name); \
 )
 
 #define INSTALL_HOOK_OFFSETLESS(name, methodInfo) MACRO_WRAP( \
-Logger::get().info("Installing 64 bit offsetless hook: %s at %lX", #name, asOffset(methodInfo->methodPointer)); \
+il2cpp_functions::CheckS_GlobalMetadata(); \
+auto offset = asOffset(methodInfo->methodPointer); \
+log(INFO, "Installing 64 bit offsetless hook: %s at %lX", #name, offset); \
+auto it = il2cpp_functions::methods.upper_bound(methodInfo->methodPointer); \
+if (it != il2cpp_functions::methods.end()) { \
+    auto nextOffset = asOffset(it->first); \
+    log(INFO, "Next method pointer: %lX (difference of %li)", nextOffset, (intptr_t)nextOffset - (intptr_t)offset); \
+} \
 A64HookFunction((void*)methodInfo->methodPointer,(void*) hook_ ## name, (void**)&name); \
 )
 
 #define INSTALL_HOOK_NAT(name) MACRO_WRAP( \
-Logger::get().info("Installing 64 bit native hook: %s", #name); \
+log(INFO, "Installing 64 bit native hook: %s", #name); \
 A64HookFunction((void*)(addr_ ## name),(void*) hook_ ## name, (void**)&name); \
 )
 
 #define INSTALL_HOOK_DIRECT(name, addr) MACRO_WRAP( \
-Logger::get().info("Installing 64 bit direct hook: %s", #name); \
+log(INFO, "Installing 64 bit direct hook: %s", #name); \
 A64HookFunction((void*)addr, (void*) hook_ ## name, (void**)&name); \
 )
 
@@ -231,47 +237,47 @@ A64HookFunction((void*)addr, (void*) hook_ ## name, (void**)&name); \
 // No original trampoline is created when uninstalling a hook, hence the nullptr
 
 #define UNINSTALL_HOOK(name) MACRO_WRAP( \
-Logger::get().info("Uninstalling 64 bit hook: %s", #name); \
+log(INFO, "Uninstalling 64 bit hook: %s", #name); \
 A64HookFunction((void*)getRealOffset(addr_ ## name),(void*)name, (void**)nullptr); \
 )
 
 #define UNINSTALL_HOOK_OFFSETLESS(name, methodInfo) MACRO_WRAP( \
-Logger::get().info("Uninstalling 64 bit offsetless hook: %s at %lX", #name, asOffset(methodInfo->methodPointer)); \
+log(INFO, "Uninstalling 64 bit offsetless hook: %s at %lX", #name, asOffset(methodInfo->methodPointer)); \
 A64HookFunction((void*)methodInfo->methodPointer,(void*)name, (void**)nullptr); \
 )
 
 #define UNINSTALL_HOOK_NAT(name) MACRO_WRAP( \
-Logger::get().info("Uninstalling 64 bit native hook: %s", #name); \
+log(INFO, "Uninstalling 64 bit native hook: %s", #name); \
 A64HookFunction((void*)(addr_ ## name),(void*)name, (void**)nullptr); \
 )
 
 #define UNINSTALL_HOOK_DIRECT(name, addr) MACRO_WRAP( \
-Logger::get().info("Uninstalling 64 bit direct hook: %s", #name); \
+log(INFO, "Uninstalling 64 bit direct hook: %s", #name); \
 A64HookFunction((void*)addr, (void*)name, (void**)nullptr); \
 )
 
 #else
 
 #define INSTALL_HOOK(name) MACRO_WRAP( \
-Logger::get().info("Installing 32 bit hook!"); \
+log(INFO, "Installing 32 bit hook!"); \
 registerInlineHook((uint32_t)getRealOffset(addr_ ## name), (uint32_t)hook_ ## name, (uint32_t **)&name); \
 inlineHook((uint32_t)getRealOffset(addr_ ## name)); \
 )
 
 #define INSTALL_HOOK_OFFSETLESS(name, methodInfo) MACRO_WRAP( \
-Logger::get().info("Installing 32 bit offsetless hook: %s at %lX", #name, asOffset(methodInfo->methodPointer)); \
+log(INFO, "Installing 32 bit offsetless hook: %s at %lX", #name, asOffset(methodInfo->methodPointer)); \
 registerInlineHook((uint32_t)methodInfo->methodPointer, (uint32_t)hook_ ## name, (uint32_t **)&name); \
 inlineHook((uint32_t)methodInfo->methodPointer); \
 )
 
 #define INSTALL_HOOK_NAT(name) MACRO_WRAP( \
-Logger::get().info("Installing 32 bit native hook!"); \
+log(INFO, "Installing 32 bit native hook!"); \
 registerInlineHook((uint32_t)(addr_ ## name), (uint32_t)hook_ ## name, (uint32_t **)&name); \
 inlineHook((uint32_t)(addr_ ## name)); \
 )
 
 #define INSTALL_HOOK_DIRECT(name, addr) MACRO_WRAP( \
-Logger::get().info("Installing 32 bit offsetless hook!"); \
+log(INFO, "Installing 32 bit offsetless hook!"); \
 registerInlineHook((uint32_t)addr, (uint32_t)hook_ ## name, (uint32_t **)&name); \
 inlineHook((uint32_t)addr); \
 )

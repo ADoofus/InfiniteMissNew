@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LOGGING_H
+#define LOGGING_H
 
 #include <android/log.h>
 #include <pthread.h>
@@ -8,24 +9,44 @@
 #include <iostream>
 #include <unistd.h>
 #include <cmath> // Included to support cmath's definition of log
-#include <string_view>
 
-namespace Logging {
-    enum Level {
-        CRITICAL = ANDROID_LOG_FATAL,
-        ERROR = ANDROID_LOG_ERROR,
-        WARNING = ANDROID_LOG_WARN,
-        INFO = ANDROID_LOG_INFO,
-        DEBUG = ANDROID_LOG_DEBUG
-    };
-}
+#ifndef LOG_VERBOSE_TYPE
+#define LOG_VERBOSE_TYPE android_LogPriority
+#endif
+
+#ifndef CRITICAL
+#define CRITICAL ANDROID_LOG_FATAL
+#endif
+#ifndef ERROR
+#define ERROR ANDROID_LOG_ERROR
+#endif
+#ifndef WARNING
+#define WARNING ANDROID_LOG_WARN
+#endif
+#ifndef INFO
+#define INFO ANDROID_LOG_INFO
+#endif
+#ifndef DEBUG
+#define DEBUG ANDROID_LOG_DEBUG
+#endif
+
+#ifndef MOD_ID
+// This is too annoying, let's change it to default to some stupid stuff
+// #error "'MOD_ID' must be defined in the mod!"
+#define MOD_ID "PLACEHOLDER_MOD_ID"
+#endif
+#ifndef VERSION
+// This is too annoying, let's change it to default to some stupid stuff
+// #error "'VERSION' must be defined in the mod!"
+#define VERSION "0.0.0"
+#endif
+
+#define TAG "QuestHook[" MOD_ID "|" VERSION "]"
 
 #ifdef log
 #undef log
 #endif
 
-#ifdef TAG
-// If TAG is defined, allow the user to log with that tag with a simple log macro
 #define logv(lvl, ...) __android_log_vprint(lvl, TAG, __VA_ARGS__)
 #ifndef FILE_LOG
 #define log(lvl, ...) __android_log_print(lvl, TAG, __VA_ARGS__)
@@ -35,9 +56,11 @@ namespace Logging {
 #define CHARS_PER_ARG 50
 #endif
 
-#ifndef LOG_PATH_FORMAT
-#define LOG_PATH_FORMAT "/sdcard/Android/data/%s/files/logs/"
+#ifndef LOG_PATH
+#define LOG_PATH "/sdcard/Android/data/com.beatgames.beatsaber/files/logs/"
 #endif
+
+bool direxists(const char* dirname);
 
 std::string get_level(int level);
 
@@ -52,6 +75,7 @@ void log_close();
 
 #define log(lvl, ...) do { __android_log_print(lvl, TAG, __VA_ARGS__); \
 log_file(lvl, __VA_ARGS__);} while(0);
+#endif
 
 #ifndef STD_BUFFER_SIZE
 #define STD_BUFFER_SIZE 256
@@ -72,8 +96,8 @@ static void* thread_func(void*) {
 }
 
 extern "C" {
-    // Redirects stdout and stderr to the android log stream. Call this once before using stdout/stderr
-    // Returns 0 on success, -1 otherwise
+// Redirects stdout and stderr to the android log stream. Call this once before using stdout/stderr
+// Returns 0 on success, -1 otherwise
     static int start_logger()
     {
         /* make stdout line-buffered and stderr unbuffered */
@@ -93,25 +117,4 @@ extern "C" {
     }
 }
 
-#endif
-
-#else
-// If TAG is not defined, we need to specify a way of getting a logging class, and a way of logging messages
-typedef struct ModInfo ModInfo;
-class Logger {
-    public:
-        Logger(const ModInfo info);
-        Logger(std::string_view tag_) : tag(tag_) {}
-        void log(Logging::Level lvl, std::string_view fmt, ...) const;
-        void critical(std::string_view fmt, ...) const;
-        void error(std::string_view fmt, ...) const;
-        void warning(std::string_view fmt, ...) const;
-        void info(std::string_view fmt, ...) const;
-        void debug(std::string_view fmt, ...) const;
-        // Returns the logger that is used within the utils library. This function should not be used outside of the main library
-        static const Logger& get();
-    private:
-        std::string tag;
-};
-
-#endif /* TAG */
+#endif /* LOGGING_H */

@@ -1,8 +1,10 @@
 {
-    "id": "ScorePercent",
-    "name": "Score Percent",
-    "author": "IdleBob Ported By Futuremappermydud",
+    "id": "infinitemiss",
+    "name": "Infinite Misses",
+    "author": "originalusername#7476",
     "description": [
+        
+        "Makes misses stay for a very long time."
         
     ],
     "category": "Gameplay",
@@ -13,16 +15,16 @@
         {
             "type": "HookMod",
             "installAction": {
-                "installLibraryFile": "libscorepercent.so"
+                "installLibraryFile": "libinfinitemiss.so"
             },
             "uninstallAction": {
-                "removeLibraryFile": "libscorepercent.so"
+                "removeLibraryFile": "libinfinitemiss.so"
             }
-        },
+        }
         {
             "type": "FileCopyMod",
-            "sourceFileName": "libbeatsaber-hook_2019_2_1f1_0_1_2.so",
-            "targetRootedPathAndFileName": "/sdcard/Android/data/com.beatgames.beatsaber/files/libs/libbeatsaber-hook_2019_2_1f1_0_1_2.so"
-        }
+            "sourceFileName": "libbeatsaber-hook_2019_2_1f1_0_1_2",
+            "targetRootedPathAndFileName": "/sdcard/Android/data/com.beatgames.beatsaber/files/libs/libbeatsaber-hook_2019_2_1f1_0_1_2"
+        },
     ]
 }
