@@ -24,18 +24,12 @@
 #include "utils/StringUtils.h"
 
 #ifdef __cplusplus
-template<class T>
+template<class T, class Enable = void>
 struct is_value_type : std::integral_constant< 
     bool,
-    (std::is_arithmetic_v<T> || std::is_enum_v<T> || std::is_pointer_v<T>) && !std::is_base_of_v<Il2CppObject, T>
+    (std::is_arithmetic_v<T> || std::is_enum_v<T> || std::is_pointer_v<T> || std::is_pod_v<T>) && !std::is_base_of_v<Il2CppObject, T>
 > {};
 template<class _T> using is_value_type_v = typename is_value_type<_T>::value;
-
-typedef struct ArrayBounds
-{
-    int32_t length;
-    int32_t lower_bound;
-} ArrayBounds;
 
 struct NamespaceAndNamePairHash
 {
@@ -63,16 +57,12 @@ struct Il2CppNameToTypeDefinitionIndexHashTable : public Il2CppHashMap<std::pair
 
 // TODO: Move these to extern "C" region
 template<class T>
-struct Array : public Il2CppObject
+struct Array : public Il2CppArray
 {
     static_assert(is_value_type<T>::value, "T must be a C# value type! (primitive, pointer or Struct)");
-    /* bounds is NULL for szarrays */
-    ArrayBounds *bounds;
-    /* total number of elements of the array */
-    int32_t max_length;
-    T values[0];
+    ALIGN_TYPE(8) T values[IL2CPP_ZERO_LEN_ARRAY];
 
-    int32_t Length() {
+    il2cpp_array_size_t Length() {
         if (bounds) {
             return bounds->length;
         }

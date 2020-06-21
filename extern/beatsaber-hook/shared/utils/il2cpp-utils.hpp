@@ -74,95 +74,42 @@ namespace il2cpp_utils {
     // Generally, it's better to just use class_from_type!
     const Il2CppType* UnRef(const Il2CppType* type);
 
-    // Calls the System.RuntimeType.MakeGenericType(System.Type gt, System.Type[] types) function
-    Il2CppReflectionType* MakeGenericType(Il2CppReflectionType* gt, Il2CppArray* types);
-
-    // Function made by zoller27osu, modified by Sc2ad
-    // PLEASE don't use, there are easier ways to get generics (see CreateParam, CreateFieldValue)
-    Il2CppClass* MakeGeneric(const Il2CppClass* klass, std::vector<const Il2CppClass*> args);
-
-    // Function made by zoller27osu, modified by Sc2ad
-    // Logs information about the given MethodInfo* as log(DEBUG)
-    void LogMethod(const MethodInfo* method);
-
-    // Created by zoller27osu
-    // Calls LogMethod on all methods in the given class
-    void LogMethods(Il2CppClass* klass, bool logParents = false);
-
-    // Created by zoller27osu
-    // Logs information about the given FieldInfo* as log(DEBUG)
-    void LogField(FieldInfo* field);
-
-    // Created by zoller27osu
-    // Calls LogField on all fields in the given class
-    void LogFields(Il2CppClass* klass, bool logParents = false);
-
-    // Created by zoller27osu
-    // Logs information about the given PropertyInfo* as log(DEBUG)
-    void LogProperty(const PropertyInfo* field);
-
-    // Created by zoller27osu
-    // Calls LogProperty on all properties in the given class
-    void LogProperties(Il2CppClass* klass, bool logParents = false);
-
-    // Some parts provided by zoller27osu
-    // Logs information about the given Il2CppClass* as log(DEBUG)
-    void LogClass(Il2CppClass* klass, bool logParents = false);
-
-    // Logs all classes (from every namespace) that start with the given prefix
-    // WARNING: THIS FUNCTION IS VERY SLOW. ONLY USE THIS FUNCTION ONCE AND WITH A FAIRLY SPECIFIC PREFIX!
-    void LogClasses(std::string_view classPrefix, bool logParents = false);
-
-    // Adds the given TypeDefinitionIndex to the class hash table of a given image
-    // Mainly used in LogClasses
-    void AddTypeToNametoClassHashTable(const Il2CppImage* img, TypeDefinitionIndex index);
-
-    // Adds the given nested types of the namespaze, parentName, and klass to the hastable
-    // Mainly used in AddTypeToNametoClassHashTable
-    void AddNestedTypesToNametoClassHashTable(Il2CppNameToTypeDefinitionIndexHashTable* hashTable, const char *namespaze, const std::string& parentName, Il2CppClass *klass);
-
-    // Adds the given nested types of typeDefinition to the class hash table of a given image
-    // Mainly used in AddTypeToNametoClassHashTable
-    void AddNestedTypesToNametoClassHashTable(const Il2CppImage* img, const Il2CppTypeDefinition* typeDefinition);
-
-    // Creates a cs string (allocates it) with the given string_view and returns it
-    // If pinned is false, will create a gchandle for the created string
-    Il2CppString* createcsstr(std::string_view inp, bool pinned = false);
-
-    // Returns if a given source object is an object of the given class
-    // Created by zoller27osu
-    [[nodiscard]] bool Match(const Il2CppObject* source, const Il2CppClass* klass) noexcept;
-
-    // Asserts that a given source object is an object of the given class
-    // Created by zoller27osu
-    bool AssertMatch(const Il2CppObject* source, const Il2CppClass* klass);
-
     // Framework provided by DaNike
     // TODO: rewrite these to il2cpp_arg_class with il2cpp_arg_type wrappers? Should make many cases faster.
     namespace il2cpp_type_check {
-        // To fix "no member named 'get' in il2cpp_type_check::il2cpp_arg_type<Blah>", define il2cpp_arg_type<Blah>!
-        // When the Il2CppType* would depend only on the type of T (not its value), just use DEFINE_IL2CPP_ARG_TYPE!
+        // To fix "no member named 'get' in il2cpp_type_check::il2cpp_arg_class<Blah>", define il2cpp_arg_class<Blah>!
+        // When the Il2CppClass* would depend only on the type of T (not its value), just use DEFINE_IL2CPP_ARG_TYPE!
         template<typename T>
-        struct il2cpp_arg_type { };
+        struct il2cpp_arg_class { };
 
         #define DEFINE_IL2CPP_DEFAULT_TYPE(type, fieldName) \
         template<> \
-        struct il2cpp_utils::il2cpp_type_check::il2cpp_arg_type<type> { \
-            static inline Il2CppType const* get() { \
+        struct il2cpp_utils::il2cpp_type_check::il2cpp_arg_class<type> { \
+            static inline Il2CppClass* get() { \
                 il2cpp_functions::Init(); \
-                return il2cpp_functions::class_get_type(il2cpp_functions::defaults->fieldName##_class); \
+                return il2cpp_functions::defaults->fieldName##_class; \
             } \
-            static inline Il2CppType const* get(type arg) { return get(); } \
+            static inline Il2CppClass* get(type arg) { return get(); } \
         }
 
         #define DEFINE_IL2CPP_ARG_TYPE(type, nameSpace, className) \
         template<> \
-        struct il2cpp_utils::il2cpp_type_check::il2cpp_arg_type<type> { \
-            static inline Il2CppType const* get() { \
+        struct il2cpp_utils::il2cpp_type_check::il2cpp_arg_class<type> { \
+            static inline Il2CppClass* get() { \
                 il2cpp_functions::Init(); \
-                return il2cpp_functions::class_get_type(il2cpp_utils::GetClassFromName(nameSpace, className)); \
+                return il2cpp_utils::GetClassFromName(nameSpace, className); \
             } \
-            static inline Il2CppType const* get(type arg) { return get(); } \
+            static inline Il2CppClass* get(type arg) { return get(); } \
+        }
+
+        #define DEFINE_IL2CPP_ARG_TYPE_GENERIC(type, postfix, nameSpace, className) \
+        template<typename... TArgs> \
+        struct ::il2cpp_utils::il2cpp_type_check::il2cpp_arg_class<type<TArgs...>postfix> { \
+            static inline Il2CppClass* get() { \
+                auto* klass = il2cpp_utils::GetClassFromName(nameSpace, className); \
+                return il2cpp_utils::MakeGeneric(klass, {il2cpp_arg_class<TArgs>::get()...}); \
+            } \
+            static inline Il2CppClass* get(type<TArgs...>postfix arg) { return get(); } \
         }
 
         DEFINE_IL2CPP_DEFAULT_TYPE(int8_t, sbyte);
@@ -190,28 +137,47 @@ namespace il2cpp_utils {
         DEFINE_IL2CPP_ARG_TYPE(Scene, "UnityEngine.SceneManagement", "Scene");
 
         template<>
-        struct il2cpp_arg_type<Il2CppType*> {
-            static inline Il2CppType const* get(Il2CppType* arg) {
+        struct il2cpp_arg_class<Il2CppClass*> {
+            static inline Il2CppClass* get(Il2CppClass* arg) {
                 return arg;
             }
         };
 
         template<>
-        struct il2cpp_arg_type<Il2CppClass*> {
-            static inline Il2CppType const* get(Il2CppClass* arg) {
+        struct il2cpp_arg_class<Il2CppType*> {
+            static inline Il2CppClass* get(Il2CppType* arg) {
                 RET_0_UNLESS(arg);
                 il2cpp_functions::Init();
-                return il2cpp_functions::class_get_type(arg);
+                return il2cpp_functions::class_from_il2cpp_type(arg);
             }
         };
 
         template<>
-        struct il2cpp_arg_type<Il2CppObject*> {
-            static inline Il2CppType const* get(Il2CppObject* arg) {
+        struct il2cpp_arg_class<Il2CppObject*> {
+            static inline Il2CppClass* get(Il2CppObject* arg) {
                 RET_0_UNLESS(arg);
                 il2cpp_functions::Init();
-                auto* klass = RET_0_UNLESS(il2cpp_functions::object_get_class(arg));
-                return il2cpp_arg_type<Il2CppClass*>::get(klass);
+                return RET_0_UNLESS(il2cpp_functions::object_get_class(arg));
+            }
+            #ifdef NEED_UNSAFE_CSHARP
+            static inline Il2CppClass* get() {
+                il2cpp_functions::Init();
+                return il2cpp_functions::defaults->object_class;
+            }
+            #endif
+        };
+
+        template<typename TArg>
+        struct il2cpp_arg_class<Array<TArg>*> {
+            static inline Il2CppClass* get(Array<TArg>* arg) {
+                RET_0_UNLESS(arg);
+                il2cpp_functions::Init();
+                // try {
+                //     auto* klass = il2cpp_functions::object_get_class(arg);
+                //     if (klass && klass->klass == klass) return klass;
+                // } catch () {}
+                Il2CppClass* eClass = RET_0_UNLESS(il2cpp_arg_class<TArg>::get());
+                return il2cpp_functions::array_class_get(eClass, 1);
             }
         };
 
@@ -221,8 +187,8 @@ namespace il2cpp_utils {
         DEFINE_MEMBER_CHECKER(obj)
         DEFINE_MEMBER_CHECKER(object)
         template<typename T>
-        struct il2cpp_arg_type<T*> {
-            static inline Il2CppType const* get(T* arg) {
+        struct il2cpp_arg_class<T*> {
+            static inline Il2CppClass* get(T* arg) {
                 RET_0_UNLESS(arg);
                 // These first 2 conditions handle Il2CppObject subclasses that were created
                 //   in libil2cpp via composition instead of inheritance
@@ -230,13 +196,20 @@ namespace il2cpp_utils {
                 auto constexpr hasObject = has_object<T, Il2CppObject>::value;
                 // Double check inheritance here
                 if constexpr(std::is_convertible_v<T*, Il2CppObject*>) {
-                    return il2cpp_arg_type<Il2CppObject*>::get(arg);
+                    return il2cpp_arg_class<Il2CppObject*>::get(arg);
                 } else if constexpr(hasObj) {
-                    return il2cpp_arg_type<Il2CppObject*>::get(&arg->obj);
+                    return il2cpp_arg_class<Il2CppObject*>::get(&arg->obj);
                 } else if constexpr(hasObject) {
-                    return il2cpp_arg_type<Il2CppObject*>::get(&arg->object);
+                    return il2cpp_arg_class<Il2CppObject*>::get(&arg->object);
                 } else {
-                    static_assert(false_t<T*>, "Turning this kind of pointer into an Il2CppType is not implemented! "
+                    #ifdef NEED_UNSAFE_CSHARP
+                    using arg_class = il2cpp_arg_class<T>;
+                    if constexpr (has_no_arg_get<arg_class>) {
+                        Il2CppClass* elementClass = arg_class::get();
+                        return il2cpp_functions::Class_GetPtrClass(elementClass);
+                    } else
+                    #endif
+                    static_assert(false_t<T*>, "Turning this kind of pointer into an Il2CppClass is not implemented! "
                         "Please pass primitives and structs as themselves instead of taking their address. "
                         "If the pointer should be treatable as Il2CppObject*, please file an issue on sc2ad/beatsaber-hook.");
                 }
@@ -246,19 +219,31 @@ namespace il2cpp_utils {
         #undef has_object
 
         template<typename T>
+        struct il2cpp_arg_type { };
+
+        template<typename T>
         struct il2cpp_arg_type<T&> {
-            static inline Il2CppType const* get(T& arg) {
+            static inline const Il2CppType* get(T& arg) {
                 // A method can store a result back to a non-const ref! Make the type byref!
-                auto* base = RET_0_UNLESS(il2cpp_arg_type<T>::get(arg));
-                return MakeRef(base);
+                Il2CppClass* klass = il2cpp_arg_class<T>::get(arg);
+                return &klass->this_arg;
             }
         };
 
         template<typename T>
         struct il2cpp_arg_type<const T&> {
-            static inline Il2CppType const* get(const T& arg) {
+            static inline const Il2CppType* get(const T& arg) {
                 // A method cannot store a result back to a const ref. It is not a C# ref.
-                return il2cpp_arg_type<T>::get(arg);
+                const Il2CppClass* klass = il2cpp_arg_class<const T>::get(arg);
+                return &klass->byval_arg;
+            }
+        };
+
+        template<typename T>
+        struct il2cpp_arg_type<T&&> {
+            static inline const Il2CppType* get(T&& arg) {
+                Il2CppClass* klass = il2cpp_arg_class<T>::get(arg);
+                return &klass->byval_arg;
             }
         };
 
@@ -293,10 +278,19 @@ namespace il2cpp_utils {
     bool IsInterface(const Il2CppClass* klass);
 
     template<typename T>
+    Il2CppClass* ExtractClass(T&& arg) {
+        Il2CppClass* klass = il2cpp_type_check::il2cpp_arg_class<std::decay_t<T>>::get(arg);
+        if (!klass) {
+            Logger::get().error("ExtractClass: failed to determine class! Tips: instead of nullptr, pass the Il2CppType* or Il2CppClass* of the argument instead!");
+        }
+        return klass;
+    }
+
+    template<typename T>
     const Il2CppType* ExtractType(T&& arg) {
-        auto* typ = il2cpp_type_check::il2cpp_arg_type<T>::get(arg);
+        const Il2CppType* typ = il2cpp_type_check::il2cpp_arg_type<T>::get(arg);
         if (!typ) {
-            log(ERROR, "ExtractType: failed to determine type! Tips: instead of nullptr, pass the Il2CppType* or Il2CppClass* of the argument instead!");
+            Logger::get().error("ExtractType: failed to determine type! Tips: instead of nullptr, pass the Il2CppType* or Il2CppClass* of the argument instead!");
         }
         return typ;
     }
@@ -349,8 +343,7 @@ namespace il2cpp_utils {
             static_assert(false_t<TArgs...>,
                 "FindMethod using argCount is invalid! If argCount is 0 then remove it; otherwise use FindMethodUnsafe!");
         } else {
-            auto* typ = RET_0_UNLESS(ExtractType(classOrInstance));
-            auto* klass = RET_0_UNLESS(il2cpp_functions::class_from_il2cpp_type(typ));
+            auto* klass = RET_0_UNLESS(ExtractClass(classOrInstance));
             if constexpr (sizeof...(TArgs) == 0) {
                 return FindMethodUnsafe(klass, methodName, 0);
             } else {
@@ -439,7 +432,7 @@ namespace il2cpp_utils {
             if (outType) {
                 auto* retType = ExtractType(ret);
                 if (!IsConvertible(retType, outType, false)) {
-                    log(WARNING, "User requested TOut %s does not match the method's return object of type %s!",
+                    Logger::get().warning("User requested TOut %s does not match the method's return object of type %s!",
                         TypeGetSimpleName(outType), TypeGetSimpleName(retType));
                 }
             }
@@ -448,13 +441,18 @@ namespace il2cpp_utils {
         // Convert the Il2CppObject* we got from runtime_invoke to TOut.
         TOut out;
         if constexpr (std::is_pointer_v<TOut>) {
-            out = reinterpret_cast<TOut>(ret);
+            using Dt = std::decay_t<TOut>;
+            if constexpr (std::is_base_of_v<Il2CppObject, std::remove_pointer_t<Dt>>) {
+                out = static_cast<TOut>(ret);
+            } else {
+                out = reinterpret_cast<TOut>(ret);
+            }
         } else {
             out = *reinterpret_cast<TOut*>(il2cpp_functions::object_unbox(ret));
         }
 
         if (exp) {
-            log(ERROR, "il2cpp_utils: RunMethod: %s: Failed with exception: %s", il2cpp_functions::method_get_name(method),
+            Logger::get().error("il2cpp_utils: RunMethod: %s: Failed with exception: %s", il2cpp_functions::method_get_name(method),
                 il2cpp_utils::ExceptionToString(exp).c_str());
             return std::nullopt;
         }
@@ -468,7 +466,7 @@ namespace il2cpp_utils {
     RunMethod(T&& classOrInstance, std::string_view methodName, TArgs&& ...params) {
         auto types = ExtractTypes(params...);
         if (types.size() != sizeof...(TArgs)) {
-            log(WARNING, "RunMethod: ExtractTypes for method %s failed!", methodName.data());
+            Logger::get().warning("RunMethod: ExtractTypes for method %s failed!", methodName.data());
             return std::nullopt;
         }
 
@@ -559,8 +557,7 @@ namespace il2cpp_utils {
     FindField(T&& instance, TArgs&&... params) {
         il2cpp_functions::Init();
 
-        auto* typ = RET_0_UNLESS(ExtractType(instance));
-        auto* klass = RET_0_UNLESS(il2cpp_functions::class_from_il2cpp_type(typ));
+        auto* klass = RET_0_UNLESS(ExtractClass(instance));
         return FindField(klass, params...);
     }
 
@@ -575,7 +572,7 @@ namespace il2cpp_utils {
         // Check that the TOut requested by the user matches the field.
         auto* outType = ExtractIndependentType<TOut>();
         if (outType && !IsConvertible(field->type, outType, false)) {
-            log(WARNING, "User requested TOut %s does not match the field's type, %s!",
+            Logger::get().warning("User requested TOut %s does not match the field's type, %s!",
                 TypeGetSimpleName(outType), TypeGetSimpleName(field->type));
         }
 
@@ -697,8 +694,7 @@ namespace il2cpp_utils {
     const PropertyInfo* FindProperty(T&& instance, std::string_view propertyName) {
         il2cpp_functions::Init();
 
-        auto* typ = RET_0_UNLESS(ExtractType(instance));
-        auto* klass = RET_0_UNLESS(il2cpp_functions::class_from_il2cpp_type(typ));
+        auto* klass = RET_0_UNLESS(ExtractClass(instance));
         return FindProperty(klass, propertyName);
     }
 
@@ -780,7 +776,7 @@ namespace il2cpp_utils {
         auto* action = il2cpp_utils::NewUnsafe<T>(actionClass, obj, &method);
         auto* asDelegate = reinterpret_cast<Delegate*>(action);
         if (asDelegate->method_ptr != (void*)callback) {
-            log(ERROR, "Created Action's method_ptr (%p) is incorrect (should be %p)!", asDelegate->method_ptr, callback);
+            Logger::get().error("Created Action's method_ptr (%p) is incorrect (should be %p)!", asDelegate->method_ptr, callback);
             return nullptr;
         }
         return action;
@@ -831,6 +827,69 @@ namespace il2cpp_utils {
         auto* klass = RET_0_UNLESS(GetFieldClass(field));
         return il2cpp_utils::NewUnsafe(klass, args...);
     }
+
+    // Calls the System.RuntimeType.MakeGenericType(System.Type gt, System.Type[] types) function
+    Il2CppReflectionType* MakeGenericType(Il2CppReflectionType* gt, Il2CppArray* types);
+
+    // Function made by zoller27osu, modified by Sc2ad
+    // PLEASE don't use, there are easier ways to get generics (see CreateParam, CreateFieldValue)
+    Il2CppClass* MakeGeneric(const Il2CppClass* klass, std::vector<const Il2CppClass*> args);
+
+    // Function made by zoller27osu, modified by Sc2ad
+    // Logs information about the given MethodInfo* as log(DEBUG)
+    void LogMethod(const MethodInfo* method);
+
+    // Created by zoller27osu
+    // Calls LogMethod on all methods in the given class
+    void LogMethods(Il2CppClass* klass, bool logParents = false);
+
+    // Created by zoller27osu
+    // Logs information about the given FieldInfo* as log(DEBUG)
+    void LogField(FieldInfo* field);
+
+    // Created by zoller27osu
+    // Calls LogField on all fields in the given class
+    void LogFields(Il2CppClass* klass, bool logParents = false);
+
+    // Created by zoller27osu
+    // Logs information about the given PropertyInfo* as log(DEBUG)
+    void LogProperty(const PropertyInfo* field);
+
+    // Created by zoller27osu
+    // Calls LogProperty on all properties in the given class
+    void LogProperties(Il2CppClass* klass, bool logParents = false);
+
+    // Some parts provided by zoller27osu
+    // Logs information about the given Il2CppClass* as log(DEBUG)
+    void LogClass(Il2CppClass* klass, bool logParents = false);
+
+    // Logs all classes (from every namespace) that start with the given prefix
+    // WARNING: THIS FUNCTION IS VERY SLOW. ONLY USE THIS FUNCTION ONCE AND WITH A FAIRLY SPECIFIC PREFIX!
+    void LogClasses(std::string_view classPrefix, bool logParents = false);
+
+    // Adds the given TypeDefinitionIndex to the class hash table of a given image
+    // Mainly used in LogClasses
+    void AddTypeToNametoClassHashTable(const Il2CppImage* img, TypeDefinitionIndex index);
+
+    // Adds the given nested types of the namespaze, parentName, and klass to the hastable
+    // Mainly used in AddTypeToNametoClassHashTable
+    void AddNestedTypesToNametoClassHashTable(Il2CppNameToTypeDefinitionIndexHashTable* hashTable, const char *namespaze, const std::string& parentName, Il2CppClass *klass);
+
+    // Adds the given nested types of typeDefinition to the class hash table of a given image
+    // Mainly used in AddTypeToNametoClassHashTable
+    void AddNestedTypesToNametoClassHashTable(const Il2CppImage* img, const Il2CppTypeDefinition* typeDefinition);
+
+    // Creates a cs string (allocates it) with the given string_view and returns it
+    // If pinned is false, will create a gchandle for the created string
+    Il2CppString* createcsstr(std::string_view inp, bool pinned = false);
+
+    // Returns if a given source object is an object of the given class
+    // Created by zoller27osu
+    [[nodiscard]] bool Match(const Il2CppObject* source, const Il2CppClass* klass) noexcept;
+
+    // Asserts that a given source object is an object of the given class
+    // Created by zoller27osu
+    bool AssertMatch(const Il2CppObject* source, const Il2CppClass* klass);
 
     template<class To, class From>
     // Downcasts a class from From* to To*
