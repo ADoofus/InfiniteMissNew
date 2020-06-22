@@ -20,11 +20,11 @@
             "uninstallAction": {
                 "removeLibraryFile": "libinfinitemiss.so"
             }
-        }
+        },
         {
             "type": "FileCopyMod",
             "sourceFileName": "libbeatsaber-hook_2019_2_1f1_0_1_2.so",
             "targetRootedPathAndFileName": "/sdcard/Android/data/com.beatgames.beatsaber/files/libs/libbeatsaber-hook_2019_2_1f1_0_1_2.so"
-        },
+        }
     ]
 }
