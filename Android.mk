@@ -16,10 +16,13 @@
 LOCAL_PATH := $(call my-dir)
 TARGET_ARCH_ABI := $(APP_ABI)
 
+TARGET_ARCH_ABI := arm64-v8a
+
 include $(CLEAR_VARS)
 LOCAL_MODULE := hook
 
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
+
 # Build the modloader shared library
 include $(CLEAR_VARS)
 LOCAL_MODULE	        := modloader
