@@ -14,8 +14,8 @@
 
 
 LOCAL_PATH := $(call my-dir)
-TARGET_ARCH_ABI := $(APP_ABI)
 
+TARGET_ARCH_ABI := arm64-v8a
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := hook
@@ -31,14 +31,14 @@ include $(PREBUILT_SHARED_LIBRARY)
 
 # Build the beatsaber-hook shared library, SPECIFICALLY VERSIONED!
 include $(CLEAR_VARS)
-LOCAL_MODULE	        := beatsaber-hook_2019_2_1f1_0_1_2
-LOCAL_SRC_FILES         := ./libbeatsaber-hook_2019_2_1f1_0_1_2.so
+LOCAL_MODULE	        := beatsaber-hook_2019_3_0f6_0_1_0
+LOCAL_SRC_FILES         := ./extern/beatsaber-hook/libs/arm64-v8a/libbeatsaber-hook_2019_3_0f6_0_1_0.so
 LOCAL_EXPORT_C_INCLUDES := ./extern/beatsaber-hook/
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_SHARED_LIBRARIES := modloader
-LOCAL_SHARED_LIBRARIES += beatsaber-hook_2019_2_1f1_0_1_2
+LOCAL_SHARED_LIBRARIES += beatsaber-hook_2019_3_0f6_0_1_0
 LOCAL_LDLIBS     := -llog
 LOCAL_CFLAGS     := -D'MOD_ID="infinitemiss"' -D'VERSION="0.1.0"' -I'c:/Program Files/Unity/Editor/Data/il2cpp/libil2cpp'
 LOCAL_MODULE     := infinitemiss
