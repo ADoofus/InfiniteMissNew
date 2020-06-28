@@ -31,23 +31,25 @@ include $(PREBUILT_SHARED_LIBRARY)
 
 # Build the beatsaber-hook shared library, SPECIFICALLY VERSIONED!
 include $(CLEAR_VARS)
-LOCAL_MODULE	        := beatsaber-hook_2019_3_0f6_0_1_0
-LOCAL_SRC_FILES         := ./extern/beatsaber-hook/libs/arm64-v8a/libbeatsaber-hook_2019_3_0f6_0_1_0.so
-LOCAL_EXPORT_C_INCLUDES := ./extern/beatsaber-hook/
+LOCAL_MODULE	        := beatsaber-hook_2019_2_1f1_0_2_0
+LOCAL_SRC_FILES         := ./libbeatsaber-hook_2019_2_1f1_0_2_0.so
+LOCAL_EXPORT_C_INCLUDES := ./extern/beatsaber-hook/shared/
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_SHARED_LIBRARIES := modloader
-LOCAL_SHARED_LIBRARIES += beatsaber-hook_2019_3_0f6_0_1_0
+LOCAL_SHARED_LIBRARIES += beatsaber-hook_2019_2_1f1_0_2_0
 LOCAL_LDLIBS     := -llog
-LOCAL_CFLAGS     := -D'MOD_ID="infinitemiss"' -D'VERSION="0.1.0"' -I'c:/Program Files/Unity/Editor/Data/il2cpp/libil2cpp'
+LOCAL_CFLAGS     := -I'c:/Program Files/Unity/Editor/Data/il2cpp/libil2cpp'
 LOCAL_MODULE     := infinitemiss
+LOCAL_CPPFLAGS   := -std=c++2a
 LOCAL_C_INCLUDES := ./include ./src
-LOCAL_SRC_FILES  := $(call rwildcard,extern/beatsaber-hook/shared/inline-hook/,*.cpp) $(call rwildcard,extern/beatsaber-hook/shared/utils/,*.cpp) $(call rwildcard,extern/beatsaber-hook/shared/inline-hook/,*.c)
+LOCAL_SRC_FILES  += $(call rwildcard,src/,*.cpp)
+LOCAL_SRC_FILES  += $(call rwildcard,extern/beatsaber-hook/src/inline-hook,*.cpp)
+LOCAL_SRC_FILES  += $(call rwildcard,extern/beatsaber-hook/src/inline-hook,*.c)
 # In order to add configuration support to your project, uncomment the following line and the include in main.cpp:
 # LOCAL_SRC_FILES  += $(call rwildcard,extern/beatsaber-hook/shared/config/,*.cpp)
 # In order to add custom UI support to your project, uncomment the following line and the include in main.cpp:
 # LOCAL_SRC_FILES  += $(call rwildcard,extern/beatsaber-hook/shared/customui/,*.cpp)
 # Add any new SRC includes from beatsaber-hook or other external libraries here
-LOCAL_SRC_FILES  += $(call rwildcard,src/,*.cpp)
 include $(BUILD_SHARED_LIBRARY)

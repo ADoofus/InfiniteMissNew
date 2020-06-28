@@ -68,6 +68,10 @@ namespace il2cpp_utils {
     // Returns the first matching class from the given namespace and typeName by searching through all assemblies that are loaded.
     Il2CppClass* GetClassFromName(std::string_view name_space, std::string_view type_name);
 
+    // Function made by zoller27osu, modified by Sc2ad
+    // PLEASE don't use, there are easier ways to get generics (see CreateParam, CreateFieldValue)
+    Il2CppClass* MakeGeneric(const Il2CppClass* klass, std::vector<const Il2CppClass*> args);
+
     // Seriously, don't un-const the returned Type
     const Il2CppType* MakeRef(const Il2CppType* type);
 
@@ -217,6 +221,57 @@ namespace il2cpp_utils {
         };
         #undef has_obj
         #undef has_object
+
+        template<template<typename... ST> class S>
+        struct il2cpp_gen_struct_arg_class;
+
+        template<template<typename... ST> class S>
+        struct il2cpp_gen_class_arg_class;
+
+        template<typename... TArgs, template<typename... ST> class S>
+        struct ::il2cpp_utils::il2cpp_type_check::il2cpp_arg_class<S<TArgs...>> {
+            static inline Il2CppClass* get() {
+                auto* klass = il2cpp_gen_struct_arg_class<S>::get();
+                return il2cpp_utils::MakeGeneric(klass, {il2cpp_arg_class<TArgs>::get()...});
+            }
+            static inline Il2CppClass* get(S<TArgs...> arg) { return get(); }
+        };
+
+        template<typename... TArgs, template<typename... ST> class S>
+        struct ::il2cpp_utils::il2cpp_type_check::il2cpp_arg_class<S<TArgs...>*> {
+            static inline Il2CppClass* get() {
+                Il2CppClass* genTemplate;
+                bool isStruct = false;
+                if constexpr (has_no_arg_get<il2cpp_gen_class_arg_class<S>>) {
+                    genTemplate = il2cpp_gen_class_arg_class<S>::get();
+                } else {
+                    genTemplate = il2cpp_gen_struct_arg_class<S>::get();
+                    isStruct = true;
+                }
+                auto* genInst = il2cpp_utils::MakeGeneric(genTemplate, {il2cpp_arg_class<TArgs>::get()...});
+                if (isStruct) {
+                    return il2cpp_functions::Class_GetPtrClass(genInst);
+                }
+                return genInst;
+            }
+            static inline Il2CppClass* get(S<TArgs...>* arg) { return get(); }
+        };
+
+        #define DEFINE_IL2CPP_ARG_TYPE_GENERIC_STRUCT(templateType, nameSpace, className) \
+        template<> \
+        struct ::il2cpp_utils::il2cpp_type_check::il2cpp_gen_struct_arg_class<templateType> { \
+            static inline Il2CppClass* get() { \
+                return il2cpp_utils::GetClassFromName(nameSpace, className); \
+            } \
+        }
+
+        #define DEFINE_IL2CPP_ARG_TYPE_GENERIC_CLASS(templateType, nameSpace, className) \
+        template<> \
+        struct ::il2cpp_utils::il2cpp_type_check::il2cpp_gen_class_arg_class<templateType> { \
+            static inline Il2CppClass* get() { \
+                return il2cpp_utils::GetClassFromName(nameSpace, className); \
+            } \
+        }
 
         template<typename T>
         struct il2cpp_arg_type { };
@@ -830,10 +885,6 @@ namespace il2cpp_utils {
 
     // Calls the System.RuntimeType.MakeGenericType(System.Type gt, System.Type[] types) function
     Il2CppReflectionType* MakeGenericType(Il2CppReflectionType* gt, Il2CppArray* types);
-
-    // Function made by zoller27osu, modified by Sc2ad
-    // PLEASE don't use, there are easier ways to get generics (see CreateParam, CreateFieldValue)
-    Il2CppClass* MakeGeneric(const Il2CppClass* klass, std::vector<const Il2CppClass*> args);
 
     // Function made by zoller27osu, modified by Sc2ad
     // Logs information about the given MethodInfo* as log(DEBUG)
