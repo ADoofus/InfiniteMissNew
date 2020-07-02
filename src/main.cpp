@@ -10,7 +10,6 @@ using namespace il2cpp_utils;
 MAKE_HOOK_OFFSETLESS(MissedNoteEffect_Init, void, Il2CppObject* self, Il2CppObject* noteData, float animationDuration, float startAnimationTime) {
     
     MissedNoteEffect_Init(self, noteData, 99999.0f, startAnimationTime);
-    
 
 }
 
