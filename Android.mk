@@ -33,7 +33,7 @@ include $(PREBUILT_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE	        := beatsaber-hook_2019_2_1f1_0_2_0
 LOCAL_SRC_FILES         := ./libbeatsaber-hook_2019_2_1f1_0_2_0.so
-LOCAL_EXPORT_C_INCLUDES := ./extern/beatsaber-hook/shared/
+LOCAL_EXPORT_C_INCLUDES := ./extern/beatsaber-hook/
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
